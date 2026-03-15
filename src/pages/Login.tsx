@@ -1,106 +1,133 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { login, register } from "../services/auth.service";
+import { login } from "../services/auth.service";
 
-import {
-  loginSchema,
-  registerSchema,
-  type LoginFormData,
-} from "../validators/auth.schema";
+import { loginSchema, type LoginFormData } from "../validators/auth.schema";
+
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { useDebounce } from "@/hooks/useDebounce";
 
 function Login() {
   const navigate = useNavigate();
 
-  const [isRegister, setIsRegister] = useState(false);
-  const [serverError, setServerError] = useState("");
-
-  const schema = isRegister ? registerSchema : loginSchema;
-
   const {
-    register: formRegister,
+    register,
     handleSubmit,
-    formState: { errors },
+    watch,
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
   });
+
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
+
+  const debouncedEmail = useDebounce(emailValue, 400);
+  const debouncedPassword = useDebounce(passwordValue, 400);
+
+  const showEmailError = debouncedEmail && errors.email;
+  const showPasswordError = debouncedPassword && errors.password;
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      setServerError("");
+      await login(data.email, data.password);
 
-      if (isRegister) {
-        await register(data.email, data.password);
-      } else {
-        await login(data.email, data.password);
-      }
+      toast.success("Login successful");
 
       navigate("/dashboard");
     } catch (err: any) {
-      setServerError(err.response?.data?.message || "Something went wrong");
+      toast.error(err.response?.data?.message || "Invalid email or password");
     }
   };
 
+  const onInvalid = () => {
+    toast.error("Please fix the form errors before submitting");
+  };
+
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          {isRegister ? "Register" : "Login"}
-        </h1>
+    <div className="flex items-center justify-center min-h-screen bg-muted px-4">
+      <Card className="w-full max-w-md shadow-lg border transition-all duration-300 ease-out">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-center text-2xl font-semibold">
+            Welcome back
+          </CardTitle>
 
-        {serverError && (
-          <p className="text-red-500 text-sm mb-4">{serverError}</p>
-        )}
+          <p className="text-sm text-muted-foreground text-center">
+            Enter your credentials to access your account
+          </p>
+        </CardHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              className="border p-2 rounded w-full"
-              {...formRegister("email")}
-            />
-
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              className="border p-2 rounded w-full"
-              {...formRegister("password")}
-            />
-
-            {errors.password && (
-              <p className="text-red-500 text-sm">{errors.password.message}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        <CardContent>
+          <form
+            onSubmit={handleSubmit(onSubmit, onInvalid)}
+            className="space-y-5"
           >
-            {isRegister ? "Register" : "Login"}
-          </button>
-        </form>
+            {/* EMAIL */}
+            <div className="space-y-2">
+              <Label>Email</Label>
 
-        <p className="text-sm text-center mt-4">
-          {isRegister ? "Already have an account?" : "Don't have an account?"}
+              <Input
+                type="email"
+                placeholder="example@email.com"
+                {...register("email")}
+                className={showEmailError ? "border-red-500" : ""}
+              />
 
-          <button
-            className="text-blue-500 ml-1"
-            onClick={() => setIsRegister(!isRegister)}
-          >
-            {isRegister ? "Login" : "Register"}
-          </button>
-        </p>
-      </div>
+              <div className="grid transition-all duration-300 ease-in-out">
+                {showEmailError && (
+                  <p className="text-xs text-red-500 animate-in fade-in slide-in-from-top-1">
+                    {errors.email?.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* PASSWORD */}
+            <div className="space-y-2">
+              <Label>Password</Label>
+
+              <Input
+                type="password"
+                placeholder="••••••••"
+                {...register("password")}
+                className={showPasswordError ? "border-red-500" : ""}
+              />
+
+              <div className="grid transition-all duration-300 ease-in-out">
+                {showPasswordError && (
+                  <p className="text-xs text-red-500 animate-in fade-in slide-in-from-top-1">
+                    {errors.password?.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting ? "Processing..." : "Login"}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-sm text-center text-muted-foreground">
+            Don't have an account?
+            <button
+              className="ml-1 font-medium text-primary hover:underline"
+              onClick={() => navigate("/register")}
+            >
+              Register
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
