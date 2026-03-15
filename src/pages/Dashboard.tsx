@@ -1,151 +1,107 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { getMyTasks, Task } from "@/services/task.service";
 
-import { taskSchema, type TaskFormData } from "@/validators/task.schema";
+import TaskCard from "@/components/tasks/TaskCard";
+import TaskForm from "@/components/tasks/TaskForm";
 
-import { createTask, updateTask, Task } from "@/services/task.service";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Plus, LogOut } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+function Dashboard() {
+  const navigate = useNavigate();
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-  refresh: () => void;
-  task?: Task | null;
-}
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
 
-function TaskForm({ open, onClose, refresh, task }: Props) {
-  const isEdit = !!task;
+  const [openForm, setOpenForm] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors, isSubmitting },
-  } = useForm<TaskFormData>({
-    resolver: zodResolver(taskSchema),
-  });
-
-  useEffect(() => {
-    if (task) {
-      setValue("title", task.title);
-      setValue("description", task.description || "");
-      setValue("completed", task.completed);
-    } else {
-      reset({
-        title: "",
-        description: "",
-        completed: false,
-      });
-    }
-  }, [task, setValue, reset]);
-
-  const onSubmit = async (data: TaskFormData) => {
+  const fetchTasks = async () => {
     try {
-      if (isEdit && task) {
-        await updateTask(task.id, data);
-        toast.success("Task updated successfully");
-      } else {
-        await createTask(data);
-        toast.success("Task created successfully");
-      }
-
-      refresh();
-      onClose();
+      const data = await getMyTasks();
+      setTasks(data);
     } catch {
-      toast.error("Something went wrong");
+      toast.error("Failed to fetch tasks");
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleCreateTask = () => {
+    setSelectedTask(null);
+    setOpenForm(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setOpenForm(true);
+  };
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg p-8">
-        <DialogHeader className="space-y-2">
-          <DialogTitle className="text-xl">
-            {isEdit ? "Edit Task" : "Create Task"}
-          </DialogTitle>
+    <div className="min-h-screen bg-muted p-6">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Task Manager</CardTitle>
 
-          <DialogDescription>
-            {isEdit
-              ? "Update your task details."
-              : "Add a new task to your task manager."}
-          </DialogDescription>
-        </DialogHeader>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={handleCreateTask}>
+                <Plus size={16} className="mr-1" />
+                New Task
+              </Button>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-4">
-          {/* TITLE */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Title</Label>
-
-            <Input placeholder="Enter task title" {...register("title")} />
-
-            {errors.title && (
-              <p className="text-xs text-red-500">{errors.title.message}</p>
-            )}
-          </div>
-
-          {/* DESCRIPTION */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Description</Label>
-
-            <Textarea
-              placeholder="Optional description"
-              className="resize-none"
-              rows={3}
-              {...register("description")}
-            />
-          </div>
-
-          {/* COMPLETED (only for edit) */}
-          {isEdit && (
-            <div className="flex items-center gap-3 pt-2">
-              <Checkbox
-                onCheckedChange={(checked) =>
-                  setValue("completed", Boolean(checked))
-                }
-              />
-
-              <Label className="text-sm cursor-pointer">
-                Mark as completed
-              </Label>
+              <Button size="sm" variant="ghost" onClick={handleLogout}>
+                <LogOut size={16} />
+              </Button>
             </div>
-          )}
+          </CardHeader>
 
-          {/* ACTIONS */}
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
+          <CardContent className="space-y-3">
+            {loading && (
+              <p className="text-sm text-muted-foreground">Loading tasks...</p>
+            )}
 
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? "Saving..."
-                : isEdit
-                  ? "Update Task"
-                  : "Create Task"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+            {!loading && tasks.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No tasks yet. Create your first task.
+              </p>
+            )}
+
+            {tasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                refresh={fetchTasks}
+                onEdit={handleEditTask}
+              />
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <TaskForm
+        open={openForm}
+        onClose={() => setOpenForm(false)}
+        refresh={fetchTasks}
+        task={selectedTask}
+      />
+    </div>
   );
 }
 
-export default TaskForm;
+export default Dashboard;
