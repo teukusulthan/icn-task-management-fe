@@ -1,73 +1,206 @@
-# React + TypeScript + Vite
+# Task Manager Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend interface for the Task Manager application built as part of a
+technical test. This application allows users to register, log in, and
+manage their daily tasks through a clean and responsive interface.
 
-Currently, two official plugins are available:
+The frontend communicates with the Task Manager API to handle
+authentication and task management operations.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+# Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Authentication
 
-## Expanding the ESLint configuration
+- User registration
+- User login
+- Password visibility toggle
+- Form validation using Zod
+- Protected routes for authenticated users
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Task Management
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Create new task
+- Edit existing task
+- Delete task with confirmation dialog
+- Toggle task completion
+- View full task details
+- Character limit validation for task description
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## UI / UX
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Responsive layout
+- Toast notifications for success and error messages
+- Dialog-based forms for creating and editing tasks
+- Task detail modal
+- Character counter for description input
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# Tech Stack
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- React
+- TypeScript
+- Vite
+- React Router
+- React Hook Form
+- Zod
+- Axios
+- TailwindCSS
+- shadcn/ui
+- Sonner (toast notifications)
+- Lucide Icons
+
+---
+
+# Project Structure
+
+src │ ├── api │ └── axios.ts │ ├── components │ ├── tasks │ │ ├──
+TaskCard.tsx │ │ ├── TaskForm.tsx │ │ ├── DeleteTaskDialog.tsx │ │ └──
+TaskDetailDialog.tsx │ ├── hooks │ └── useDebounce.ts │ ├── pages │ ├──
+Login.tsx │ ├── Register.tsx │ └── Dashboard.tsx │ ├── services │ ├──
+auth.service.ts │ └── task.service.ts │ ├── validators │ ├──
+auth.schema.ts │ └── task.schema.ts │ └── App.tsx
+
+---
+
+# Environment Variables
+
+Create a `.env` file in the root directory.
+
+Example:
+
+VITE_API_URL=http://localhost:3000
+
+Or copy from:
+
+.env.example
+
+---
+
+# Installation
+
+Clone the repository:
+
+git clone `<repository-url>`{=html}
+
+Navigate to the frontend directory:
+
+cd frontend
+
+Install dependencies:
+
+npm install
+
+---
+
+# Running the Application
+
+Start development server:
+
+npm run dev
+
+The application will run at:
+
+http://localhost:5173
+
+---
+
+# Application Pages
+
+## Login Page
+
+Users can log in using their email and password.
+
+Features: - Form validation - Password visibility toggle - Error
+handling using toast notifications
+
+## Register Page
+
+Users can create a new account.
+
+Features: - Email validation - Password validation - Confirm password
+check
+
+## Dashboard
+
+Main interface for managing tasks.
+
+Features: - Display user's tasks - Create new task - Edit task - Delete
+task - Toggle task completion - View detailed task information - Logout
+functionality
+
+---
+
+# API Integration
+
+The frontend communicates with the backend using Axios.
+
+Main endpoints used:
+
+POST /users Register user POST /users/login User login GET
+/tasks/my-tasks Get tasks for logged in user POST /tasks Create task PUT
+/tasks/:id Update task DELETE /tasks/:id Delete task
+
+---
+
+# State Management
+
+State is handled using:
+
+- React useState
+- React useEffect
+- React Hook Form for form state
+- LocalStorage for storing user email
+
+---
+
+# UI Components
+
+UI components are built using shadcn/ui with TailwindCSS.
+
+Main components used:
+
+- Card
+- Dialog
+- Button
+- Input
+- Textarea
+- Checkbox
+- Badge
+
+---
+
+# Validation
+
+Form validation is implemented using Zod + React Hook Form.
+
+Examples:
+
+- Email format validation
+- Password minimum length
+- Task title required
+- Task description maximum 1000 characters
+
+---
+
+# Notifications
+
+User feedback is handled using Sonner toast notifications.
+
+Examples:
+
+- Login success
+- Task creation success
+- Task update confirmation
+- Task deletion confirmation
+- Error messages
+
+---
+
+# Notes
+
+- This frontend is designed to work with the Task Manager API backend.
+- All API communication is handled using Axios.
+- Authentication uses HTTP cookies from the backend.
