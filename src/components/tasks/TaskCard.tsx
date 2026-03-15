@@ -16,9 +16,15 @@ interface Props {
   task: Task;
   refresh: () => void;
   onEdit: (task: Task) => void;
+  onOpenDetail: (task: Task) => void;
 }
 
-export default function TaskCard({ task, refresh, onEdit }: Props) {
+export default function TaskCard({
+  task,
+  refresh,
+  onEdit,
+  onOpenDetail,
+}: Props) {
   const [openDelete, setOpenDelete] = useState(false);
 
   const toggleComplete = async () => {
@@ -36,17 +42,21 @@ export default function TaskCard({ task, refresh, onEdit }: Props) {
 
   return (
     <>
-      <Card className="transition-all hover:shadow-md">
-        <CardContent className="flex items-start justify-between p-4">
+      <Card
+        className="transition-all hover:shadow-sm cursor-pointer"
+        onClick={() => onOpenDetail(task)}
+      >
+        <CardContent className="flex items-center justify-between p-3">
           <div className="flex gap-3 items-start">
             <Checkbox
               checked={task.completed}
-              onCheckedChange={toggleComplete}
+              onClick={(e) => e.stopPropagation()}
+              onCheckedChange={() => toggleComplete()}
             />
 
-            <div>
+            <div className="leading-tight">
               <p
-                className={`font-medium ${
+                className={`text-sm font-medium ${
                   task.completed ? "line-through text-muted-foreground" : ""
                 }`}
               >
@@ -54,24 +64,34 @@ export default function TaskCard({ task, refresh, onEdit }: Props) {
               </p>
 
               {task.description && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground truncate max-w-[420px]">
                   {task.description}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button variant="ghost" size="icon" onClick={() => onEdit(task)}>
-              <Pencil size={16} />
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(task);
+              }}
+            >
+              <Pencil size={15} />
             </Button>
 
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setOpenDelete(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenDelete(true);
+              }}
             >
-              <Trash2 size={16} />
+              <Trash2 size={15} />
             </Button>
           </div>
         </CardContent>

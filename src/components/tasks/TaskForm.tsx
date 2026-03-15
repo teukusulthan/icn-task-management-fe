@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,15 +35,26 @@ function TaskForm({ open, onClose, refresh, task }: Props) {
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const [charCount, setCharCount] = useState(0);
+
   const {
     register,
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
   });
+
+  const descriptionRegister = register("description");
+
+  const descriptionValue = watch("description");
+
+  useEffect(() => {
+    setCharCount(descriptionValue?.length || 0);
+  }, [descriptionValue]);
 
   useEffect(() => {
     if (task) {
@@ -115,15 +126,21 @@ function TaskForm({ open, onClose, refresh, task }: Props) {
             <Label className="text-sm font-medium">Description</Label>
 
             <Textarea
+              {...descriptionRegister}
+              maxLength={1000}
               ref={(el) => {
+                descriptionRegister.ref(el);
                 textareaRef.current = el;
-                register("description").ref(el);
               }}
               placeholder="Optional description..."
               rows={1}
               className="resize-none overflow-hidden border-gray-300 hover:border-gray-400 focus:border-gray-500"
               onInput={(e) => autoResize(e.currentTarget)}
             />
+
+            <div className="flex justify-end text-xs text-muted-foreground">
+              {charCount}/1000
+            </div>
           </div>
 
           {isEdit && (

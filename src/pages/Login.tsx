@@ -44,13 +44,18 @@ function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
+      const res = await login(data.email, data.password);
+
+      if (!res?.success) {
+        toast.error(res?.message || "Invalid email or password");
+        return;
+      }
 
       localStorage.setItem("userEmail", data.email);
 
       toast.success("Login successful");
 
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Invalid email or password");
     }
