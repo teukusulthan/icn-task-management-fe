@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { getMyTasks, Task } from "@/services/task.service";
+import { logout } from "@/services/auth.service";
 
 import TaskCard from "@/components/tasks/TaskCard";
 import TaskForm from "@/components/tasks/TaskForm";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
@@ -23,6 +23,8 @@ function Dashboard() {
   const [openForm, setOpenForm] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+  const [email, setEmail] = useState<string | null>(null);
+
   const fetchTasks = async () => {
     try {
       const data = await getMyTasks();
@@ -36,6 +38,9 @@ function Dashboard() {
 
   useEffect(() => {
     fetchTasks();
+
+    const storedEmail = localStorage.getItem("userEmail");
+    if (storedEmail) setEmail(storedEmail);
   }, []);
 
   const handleCreateTask = () => {
@@ -48,38 +53,62 @@ function Dashboard() {
     setOpenForm(true);
   };
 
-  const handleLogout = () => {
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+
+      localStorage.removeItem("userEmail");
+
+      toast.success("Logged out successfully");
+
+      navigate("/login");
+    } catch {
+      toast.error("Logout failed");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-muted p-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Task Manager</CardTitle>
+    <div className="min-h-screen bg-muted">
+      <div className="max-w-4xl mx-auto px-6 py-10 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">Task Manager</h1>
 
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={handleCreateTask}>
-                <Plus size={16} className="mr-1" />
+            <p className="text-sm text-muted-foreground">
+              {email ? `Logged in as ${email}` : "Manage your daily tasks"}
+            </p>
+          </div>
+
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            <LogOut size={16} className="mr-2" />
+            Logout
+          </Button>
+        </div>
+
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <div className="flex justify-end">
+              <Button onClick={handleCreateTask}>
+                <Plus size={16} className="mr-2" />
                 New Task
               </Button>
-
-              <Button size="sm" variant="ghost" onClick={handleLogout}>
-                <LogOut size={16} />
-              </Button>
             </div>
-          </CardHeader>
 
-          <CardContent className="space-y-3">
             {loading && (
               <p className="text-sm text-muted-foreground">Loading tasks...</p>
             )}
 
             {!loading && tasks.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No tasks yet. Create your first task.
-              </p>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <p className="text-sm text-muted-foreground mb-4">
+                  No tasks yet. Create your first task.
+                </p>
+
+                <Button onClick={handleCreateTask}>
+                  <Plus size={16} className="mr-2" />
+                  Create Task
+                </Button>
+              </div>
             )}
 
             {tasks.map((task) => (
