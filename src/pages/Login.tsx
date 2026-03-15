@@ -46,6 +46,8 @@ function Login() {
     try {
       await login(data.email, data.password);
 
+      localStorage.setItem("userEmail", data.email);
+
       toast.success("Login successful");
 
       navigate("/dashboard");
@@ -76,7 +78,6 @@ function Login() {
             onSubmit={handleSubmit(onSubmit, onInvalid)}
             className="space-y-5"
           >
-            {/* EMAIL */}
             <div className="space-y-2">
               <Label>Email</Label>
 
