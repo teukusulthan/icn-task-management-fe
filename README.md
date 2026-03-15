@@ -1,11 +1,21 @@
-# Task Manager Frontend
+# Task Management Frontend
 
-Frontend interface for the Task Manager application built as part of a
+Frontend interface for the Task Management application built as part of a
 technical test. This application allows users to register, log in, and
 manage their daily tasks through a clean and responsive interface.
 
-The frontend communicates with the Task Manager API to handle
+The frontend communicates with the Task Management API to handle
 authentication and task management operations.
+
+---
+
+# Live URL
+
+Frontend  
+https://icn-task-management-fe.vercel.app
+
+Backend API  
+https://icn-task-management-be.vercel.app
 
 ---
 
@@ -56,12 +66,35 @@ authentication and task management operations.
 
 # Project Structure
 
-src │ ├── api │ └── axios.ts │ ├── components │ ├── tasks │ │ ├──
-TaskCard.tsx │ │ ├── TaskForm.tsx │ │ ├── DeleteTaskDialog.tsx │ │ └──
-TaskDetailDialog.tsx │ ├── hooks │ └── useDebounce.ts │ ├── pages │ ├──
-Login.tsx │ ├── Register.tsx │ └── Dashboard.tsx │ ├── services │ ├──
-auth.service.ts │ └── task.service.ts │ ├── validators │ ├──
-auth.schema.ts │ └── task.schema.ts │ └── App.tsx
+src
+│
+├── api
+│ └── axios.ts
+│
+├── components
+│ └── tasks
+│ ├── TaskCard.tsx
+│ ├── TaskForm.tsx
+│ ├── DeleteTaskDialog.tsx
+│ └── TaskDetailDialog.tsx
+│
+├── hooks
+│ └── useDebounce.ts
+│
+├── pages
+│ ├── Login.tsx
+│ ├── Register.tsx
+│ └── Dashboard.tsx
+│
+├── services
+│ ├── auth.service.ts
+│ └── task.service.ts
+│
+├── validators
+│ ├── auth.schema.ts
+│ └── task.schema.ts
+│
+└── App.tsx
 
 ---
 
@@ -83,7 +116,7 @@ Or copy from:
 
 Clone the repository:
 
-git clone `<repository-url>`{=html}
+git clone <repository-url>
 
 Navigate to the frontend directory:
 
@@ -113,23 +146,35 @@ http://localhost:5173
 
 Users can log in using their email and password.
 
-Features: - Form validation - Password visibility toggle - Error
-handling using toast notifications
+Features:
+
+- Form validation
+- Password visibility toggle
+- Error handling using toast notifications
 
 ## Register Page
 
 Users can create a new account.
 
-Features: - Email validation - Password validation - Confirm password
-check
+Features:
+
+- Email validation
+- Password validation
+- Confirm password check
 
 ## Dashboard
 
 Main interface for managing tasks.
 
-Features: - Display user's tasks - Create new task - Edit task - Delete
-task - Toggle task completion - View detailed task information - Logout
-functionality
+Features:
+
+- Display user's tasks
+- Create new task
+- Edit task
+- Delete task
+- Toggle task completion
+- View detailed task information
+- Logout functionality
 
 ---
 
@@ -139,9 +184,12 @@ The frontend communicates with the backend using Axios.
 
 Main endpoints used:
 
-POST /users Register user POST /users/login User login GET
-/tasks/my-tasks Get tasks for logged in user POST /tasks Create task PUT
-/tasks/:id Update task DELETE /tasks/:id Delete task
+POST /users Register user  
+POST /users/login User login  
+GET /tasks/my-tasks Get tasks for logged in user  
+POST /tasks Create task  
+PUT /tasks/:id Update task  
+DELETE /tasks/:id Delete task
 
 ---
 
@@ -201,6 +249,6 @@ Examples:
 
 # Notes
 
-- This frontend is designed to work with the Task Manager API backend.
+- This frontend is designed to work with the Task Management API backend.
 - All API communication is handled using Axios.
 - Authentication uses HTTP cookies from the backend.
