@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { login } from "../services/auth.service";
+import { register as registerUser } from "../services/auth.service";
 
-import { loginSchema, type LoginFormData } from "../validators/auth.schema";
+import {
+  registerSchema,
+  type RegisterFormData,
+} from "../validators/auth.schema";
 
 import { toast } from "sonner";
 
@@ -19,38 +22,44 @@ import { useDebounce } from "@/hooks/useDebounce";
 
 import { Eye, EyeOff } from "lucide-react";
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     mode: "onChange",
   });
 
   const emailValue = watch("email");
   const passwordValue = watch("password");
+  const confirmPasswordValue = watch("confirmPassword");
 
   const debouncedEmail = useDebounce(emailValue, 400);
   const debouncedPassword = useDebounce(passwordValue, 400);
+  const debouncedConfirmPassword = useDebounce(confirmPasswordValue, 400);
 
   const showEmailError = debouncedEmail && errors.email;
   const showPasswordError = debouncedPassword && errors.password;
+  const showConfirmPasswordError =
+    debouncedConfirmPassword && errors.confirmPassword;
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      await login(data.email, data.password);
+      await registerUser(data.email, data.password);
 
-      toast.success("Login successful");
+      toast.success("Account created successfully");
 
-      navigate("/dashboard");
+      navigate("/login");
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Invalid email or password");
+      toast.error(err.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -63,11 +72,11 @@ function Login() {
       <Card className="w-full max-w-md shadow-lg border transition-all duration-300 ease-out">
         <CardHeader className="space-y-1">
           <CardTitle className="text-center text-2xl font-semibold">
-            Welcome back
+            Create account
           </CardTitle>
 
           <p className="text-sm text-muted-foreground text-center">
-            Enter your credentials to access your account
+            Enter your information to create your account
           </p>
         </CardHeader>
 
@@ -87,7 +96,7 @@ function Login() {
                 className={showEmailError ? "border-red-500" : ""}
               />
 
-              <div className="grid transition-all duration-300 ease-in-out">
+              <div className="grid transition-all duration-300">
                 {showEmailError && (
                   <p className="text-xs text-red-500 animate-in fade-in slide-in-from-top-1">
                     {errors.email?.message}
@@ -96,6 +105,7 @@ function Login() {
               </div>
             </div>
 
+            {/* PASSWORD */}
             <div className="space-y-2">
               <Label>Password</Label>
 
@@ -112,13 +122,13 @@ function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-2.5 text-muted-foreground"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
-              <div className="grid transition-all duration-300 ease-in-out">
+              <div className="grid transition-all duration-300">
                 {showPasswordError && (
                   <p className="text-xs text-red-500 animate-in fade-in slide-in-from-top-1">
                     {errors.password?.message}
@@ -127,18 +137,54 @@ function Login() {
               </div>
             </div>
 
+            {/* CONFIRM PASSWORD */}
+            <div className="space-y-2">
+              <Label>Confirm password</Label>
+
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  {...register("confirmPassword")}
+                  className={
+                    showConfirmPasswordError ? "border-red-500 pr-10" : "pr-10"
+                  }
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-2.5 text-muted-foreground"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+
+              <div className="grid transition-all duration-300">
+                {showConfirmPasswordError && (
+                  <p className="text-xs text-red-500 animate-in fade-in slide-in-from-top-1">
+                    {errors.confirmPassword?.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? "Processing..." : "Login"}
+              {isSubmitting ? "Creating account..." : "Create account"}
             </Button>
           </form>
 
           <div className="mt-6 text-sm text-center text-muted-foreground">
-            Don't have an account?
+            Already have an account?
             <button
               className="ml-1 font-medium text-primary hover:underline"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/login")}
             >
-              Register
+              Login
             </button>
           </div>
         </CardContent>
@@ -147,4 +193,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
